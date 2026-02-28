@@ -19,10 +19,12 @@ static double calculate_temperature(double resistance, double resistance_0);
 
 #define MAX31865_NODE DT_NODELABEL(max31865)
 #define ZEPHYR_USER_NODE DT_PATH(zephyr_user)
-#define TRIAC_DELAY_US 3000
 #define TRIAC_PULSE_US 100
 #define TRIAC_THREAD_STACK_SIZE 1024
 #define TRIAC_THREAD_PRIORITY 5
+#define AC_HALF_CYCLE_US 8333
+#define MIN_GATE_DELAY_US 200
+#define POWER_PERCENT 40
 
 #if !DT_NODE_HAS_PROP(ZEPHYR_USER_NODE, zc_gpios)
 #error "zephyr,user.zc-gpios is not defined in app.overlay"
@@ -40,11 +42,21 @@ static const struct gpio_dt_spec fire_gpio = GPIO_DT_SPEC_GET(ZEPHYR_USER_NODE, 
 static struct gpio_callback zc_cb_data;
 static atomic_t zc_pulse_count = ATOMIC_INIT(0);
 static atomic_t fire_pulse_count = ATOMIC_INIT(0);
+static atomic_t power_percent = ATOMIC_INIT(POWER_PERCENT);
 K_SEM_DEFINE(zc_sem, 0, 1000);
 K_THREAD_STACK_DEFINE(triac_thread_stack, TRIAC_THREAD_STACK_SIZE);
 static struct k_thread triac_thread_data;
 
 const struct device *dev = DEVICE_DT_GET_ONE(maxim_max31865);
+
+static uint32_t power_to_delay_us(uint32_t power_pct)
+{
+	if (power_pct >= 100U) {
+		return MIN_GATE_DELAY_US;
+	}
+	return MIN_GATE_DELAY_US +
+	       (((AC_HALF_CYCLE_US - MIN_GATE_DELAY_US) * (100U - power_pct)) / 100U);
+}
 
 static void triac_pulse_thread(void *arg1, void *arg2, void *arg3)
 {
@@ -53,8 +65,13 @@ static void triac_pulse_thread(void *arg1, void *arg2, void *arg3)
 	ARG_UNUSED(arg3);
 
 	while (1) {
+		uint32_t delay_us;
+		uint32_t pwr;
+
 		k_sem_take(&zc_sem, K_FOREVER);
-		k_busy_wait(TRIAC_DELAY_US);
+		pwr = (uint32_t)atomic_get(&power_percent);
+		delay_us = power_to_delay_us(pwr);
+		k_busy_wait(delay_us);
 		gpio_pin_set_dt(&fire_gpio, 1);
 		k_busy_wait(TRIAC_PULSE_US);
 		gpio_pin_set_dt(&fire_gpio, 0);
@@ -154,6 +171,10 @@ int main(void)
 
 	printk("Zero-cross em %s pin %u (RISING).\n", zc_gpio.port->name, zc_gpio.pin);
 	printk("Disparo triac em %s pin %u.\n", fire_gpio.port->name, fire_gpio.pin);
+	printk("Power fixed test = %u%% (delay=%uus, pulse=%uus)\n",
+	       (uint32_t)atomic_get(&power_percent),
+	       power_to_delay_us((uint32_t)atomic_get(&power_percent)),
+	       TRIAC_PULSE_US);
 
 	k_thread_create(&triac_thread_data, triac_thread_stack, TRIAC_THREAD_STACK_SIZE,
 			triac_pulse_thread, NULL, NULL, NULL,
@@ -243,7 +264,8 @@ int main(void)
 		int64_t elapsed_ms = now_ms - last_zc_ms;
 		if (elapsed_ms > 0) {
 			uint32_t hz_x10 = (uint32_t)((10000ULL * zc_delta) / (uint64_t)elapsed_ms);
-			printk("ZC: total=%u delta=%u freq=%u.%u Hz | FIRE: total=%u delta=%u\n",
+			printk("PWR=%u%% ZC: total=%u delta=%u freq=%u.%u Hz | FIRE: total=%u delta=%u\n",
+			       (uint32_t)atomic_get(&power_percent),
 			       zc_total, zc_delta, hz_x10 / 10, hz_x10 % 10, fire_total, fire_delta);
 		}
 		last_zc_count = zc_total;
