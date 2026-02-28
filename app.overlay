@@ -1,3 +1,12 @@
+/ {
+	zephyr,user {
+		/* Arduino D2 on Nucleo-F767ZI: PF15 */
+		zc-gpios = <&gpiof 15 GPIO_ACTIVE_HIGH>;
+		/* Arduino D4 on Nucleo-F767ZI: PF14 */
+		fire-gpios = <&gpiof 14 GPIO_ACTIVE_HIGH>;
+	};
+};
+
 &spi1 {
 	max31865: max31865@0 {
 		compatible = "maxim,max31865";
