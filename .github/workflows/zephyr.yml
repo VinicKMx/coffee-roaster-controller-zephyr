@@ -46,8 +46,8 @@ jobs:
               west build -p always -b nucleo_f767zi \
                 -s app \
                 -d build/nucleo-f767zi-robotdyn \
-                -- -DEXTRA_CONF_FILE=app/ci/robotdyn.conf \
-                   -DEXTRA_DTC_OVERLAY_FILE=app/ci/robotdyn.overlay
+                -- -DEXTRA_CONF_FILE=ci/robotdyn.conf \
+                   -DEXTRA_DTC_OVERLAY_FILE=ci/robotdyn.overlay
               ;;
             profile-native-test)
               west build -p always -b native_sim/native/64 \

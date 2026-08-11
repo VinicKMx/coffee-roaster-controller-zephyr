@@ -29,8 +29,8 @@ To compile the RobotDyn dimmer backend:
 
 ```sh
 west build -p always -b nucleo_f767zi -s app \
-  -- -DEXTRA_CONF_FILE=app/ci/robotdyn.conf \
-     -DEXTRA_DTC_OVERLAY_FILE=app/ci/robotdyn.overlay
+  -- -DEXTRA_CONF_FILE=ci/robotdyn.conf \
+     -DEXTRA_DTC_OVERLAY_FILE=ci/robotdyn.overlay
 ```
 
 ## Tests
