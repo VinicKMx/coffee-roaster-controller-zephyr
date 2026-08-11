@@ -1,11 +1,4 @@
-&spi1 {
-	max31865: max31865@0 {
-		compatible = "maxim,max31865";
-		reg = <0>;
-		spi-max-frequency = <1000000>;
-		resistance-at-zero = <100>;
-		resistance-reference = <430>;
-		maxim,3-wire;
-		status = "okay";
-	};
-};
+/*
+ * Common overlays can live here. The current NUCLEO-F767ZI wiring is in
+ * boards/nucleo_f767zi.overlay because Zephyr auto-selects board overlays.
+ */

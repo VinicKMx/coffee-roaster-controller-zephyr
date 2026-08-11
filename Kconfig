@@ -1,0 +1,40 @@
+mainmenu "Coffee Roaster Controller"
+
+source "Kconfig.zephyr"
+
+menu "Coffee Roaster Controller"
+
+config ROASTER_DISPLAY
+	bool "Local display support"
+	default n
+
+config ROASTER_ENCODER
+	bool "Rotary encoder support"
+	default n
+
+config ROASTER_CURRENT_SENSE
+	bool "Heater current sensing support"
+	default n
+
+config ROASTER_ZERO_CROSS
+	bool "Mains zero-cross sensing support"
+	default n
+
+config ROASTER_FAN_CONTROL
+	bool "Fan power control support"
+	default n
+
+config ROASTER_STORAGE
+	bool "Persistent profile and settings storage"
+	default n
+
+config ROASTER_HEATER_BURST_WINDOW_MS
+	int "Heater time-proportioning burst window"
+	default 1000
+	range 100 10000
+
+config ROASTER_HARD_MAX_TEMP_MDEG_C
+	int "Absolute safety temperature limit in millidegrees C"
+	default 260000
+
+endmenu

@@ -1,0 +1,20 @@
+/ {
+	aliases {
+		/* Mock heater output for checkpoint 5. Replace this alias with the
+		 * SSR driver GPIO only after the power wiring is characterized.
+		 */
+		heater0 = &green_led;
+	};
+};
+
+&spi1 {
+	max31865: max31865@0 {
+		compatible = "maxim,max31865";
+		reg = <0>;
+		spi-max-frequency = <1000000>;
+		resistance-at-zero = <100>;
+		resistance-reference = <430>;
+		maxim,3-wire;
+		status = "okay";
+	};
+};
