@@ -55,3 +55,8 @@ build/profile-test/zephyr/zephyr.exe
 The default physical command is heater off. The firmware must never make the UI,
 PID, profile engine or BLE transport the authority that decides whether heating
 is permitted.
+
+## License
+
+Dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your
+option.
