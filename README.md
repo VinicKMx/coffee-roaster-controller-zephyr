@@ -6,15 +6,16 @@ NUCLEO-F767ZI reference platform.
 The current implementation is an architectural reset checkpoint:
 
 - MAX31865 temperature input is isolated behind `temperature_sensor_read()`.
-- Heater output is isolated behind `heater_set_demand()` and is mapped to the
-  NUCLEO LED as a safe mock until the popper power stage is characterized.
+- Heater output is isolated behind `heater_set_demand()`. The default backend
+  is still the NUCLEO LED mock; the hardware target is now a RobotDyn
+  16A/600V AC dimmer module using `ZC` and `PSM` pins.
 - Safety logic owns final heater permission.
 - Application telemetry is transport-independent and emitted as CSV on the
   Zephyr console.
 
-Do not connect the heater or mains wiring to this firmware until
-`docs/hardware/popper-characterization.md` and `docs/hardware/power-stage.md`
-are completed for the actual popper.
+Do not connect heater or mains wiring until the popper wiring, measured load
+current, fuse, enclosure, heatsink and safety relay wiring are verified against
+`docs/hardware/power-stage.md` and `docs/hardware/robotdyn-dimmer.md`.
 
 ## Build
 
@@ -58,7 +59,8 @@ west build -p always -b native_sim/native/64 \
 
 - Board: `nucleo_f767zi`
 - Temperature sensor: MAX31865 on `spi1`
-- Heater actuator: `heater0` devicetree alias, currently mapped to `led0`
+- Heater actuator target: RobotDyn 16A/600V AC dimmer module
+- Safe default actuator: `heater0` devicetree alias mapped to `led0`
 - Fan: fixed/full-power concept only; no fan hardware control yet
 - STOP input: not wired yet; safety path exists in the model
 

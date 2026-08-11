@@ -43,5 +43,11 @@ Future BLE disconnect cannot affect the control loop or safety logic.
 
 ## SAFE-010
 
-The future safety relay/contactor must be physically fail-safe: unpowered means
-heater de-energized.
+The safety relay/contactor must be physically fail-safe: unpowered means heater
+de-energized.
+
+## SAFE-011
+
+Loss of RobotDyn zero-cross timing must prevent effective heater output. The
+firmware may request heat only when safety permits it and the hardware layer has
+recent `ZC` activity.

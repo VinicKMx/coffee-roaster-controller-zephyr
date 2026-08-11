@@ -28,10 +28,57 @@ config ROASTER_STORAGE
 	bool "Persistent profile and settings storage"
 	default n
 
+choice ROASTER_HEATER_ACTUATOR
+	prompt "Heater actuator backend"
+	default ROASTER_HEATER_MOCK_GPIO
+
+config ROASTER_HEATER_MOCK_GPIO
+	bool "Mock GPIO time-proportioning output"
+	help
+	  Safe bring-up backend. It maps heater demand to a slow on/off GPIO
+	  window and is intended for an LED or other low-voltage mock load.
+
+config ROASTER_HEATER_ROBOTDYN_DIMMER
+	bool "RobotDyn 16A/600V AC dimmer"
+	select ROASTER_ZERO_CROSS
+	help
+	  Phase-angle TRIAC backend for RobotDyn-style AC dimmer modules with
+	  ZC and PSM pins. The real pins must be supplied by devicetree aliases
+	  heater-zc0 and heater-psm0.
+
+endchoice
+
 config ROASTER_HEATER_BURST_WINDOW_MS
 	int "Heater time-proportioning burst window"
 	default 1000
 	range 100 10000
+	depends on ROASTER_HEATER_MOCK_GPIO
+
+config ROASTER_MAINS_HALF_CYCLE_US
+	int "Nominal mains half-cycle period in microseconds"
+	default 8333
+	range 7000 10000
+	depends on ROASTER_HEATER_ROBOTDYN_DIMMER
+	help
+	  Use 8333 for 60 Hz mains and 10000 for 50 Hz mains.
+
+config ROASTER_ROBOTDYN_DIMMER_MIN_FIRE_DELAY_US
+	int "Minimum TRIAC fire delay after zero-cross"
+	default 150
+	range 50 1000
+	depends on ROASTER_HEATER_ROBOTDYN_DIMMER
+
+config ROASTER_ROBOTDYN_DIMMER_GATE_PULSE_US
+	int "TRIAC gate pulse duration"
+	default 100
+	range 50 1000
+	depends on ROASTER_HEATER_ROBOTDYN_DIMMER
+
+config ROASTER_ROBOTDYN_DIMMER_ZC_MIN_INTERVAL_US
+	int "Zero-cross noise reject interval"
+	default 3000
+	range 1000 6000
+	depends on ROASTER_HEATER_ROBOTDYN_DIMMER
 
 config ROASTER_HARD_MAX_TEMP_MDEG_C
 	int "Absolute safety temperature limit in millidegrees C"

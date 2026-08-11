@@ -1,7 +1,7 @@
 / {
 	aliases {
-		/* Mock heater output for checkpoint 5. Replace this alias with the
-		 * SSR driver GPIO only after the power wiring is characterized.
+		/* Safe mock heater output. The RobotDyn dimmer backend uses
+		 * heater-zc0 and heater-psm0 aliases after real pins are selected.
 		 */
 		heater0 = &green_led;
 	};

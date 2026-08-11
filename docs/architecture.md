@@ -17,9 +17,15 @@ not write hardware directly.
 
 ## Current Checkpoint
 
-The repository is at the reset/domain-model checkpoint. The heater driver uses
-a GPIO time-proportioning scheduler, but the devicetree alias points to the
-NUCLEO LED. This lets safety paths be tested before any mains wiring exists.
+The repository is at the reset/domain-model checkpoint with the heater
+abstraction in place. The safe default backend maps heater demand to the NUCLEO
+LED. The selected real actuator is a RobotDyn 16A/600V AC dimmer module, driven
+as a hardware-layer detail through zero-cross input and TRIAC gate output
+aliases.
+
+The application, PID/profile code and safety manager still exchange normalized
+heater demand in `0..1000 permille`; they do not know whether the hardware
+backend is an LED mock, a RobotDyn phase-angle dimmer or a future power board.
 
 ## Portability
 
