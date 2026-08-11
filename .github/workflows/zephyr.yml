@@ -10,27 +10,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: nucleo-f767zi-mock
-            board: nucleo_f767zi
-            source: app
-            build_dir: build/nucleo-f767zi-mock
-            cmake_args: ""
-            run_binary: ""
-          - name: nucleo-f767zi-robotdyn
-            board: nucleo_f767zi
-            source: app
-            build_dir: build/nucleo-f767zi-robotdyn
-            cmake_args: >-
-              -DEXTRA_CONF_FILE=app/ci/robotdyn.conf
-              -DEXTRA_DTC_OVERLAY_FILE=app/ci/robotdyn.overlay
-            run_binary: ""
-          - name: profile-native-test
-            board: native_sim/native/64
-            source: app/tests/profile
-            build_dir: build/profile-native-test
-            cmake_args: ""
-            run_binary: build/profile-native-test/zephyr/zephyr.exe
+        target:
+          - nucleo-f767zi-mock
+          - nucleo-f767zi-robotdyn
+          - profile-native-test
 
     steps:
       - name: Checkout application
@@ -49,19 +32,28 @@ jobs:
           app-path: app
           toolchains: arm-zephyr-eabi
 
-      - name: Build ${{ matrix.name }}
+      - name: Build ${{ matrix.target }}
         run: |
-          if [ -n "${{ matrix.cmake_args }}" ]; then
-            west build -p always -b "${{ matrix.board }}" \
-              -s "${{ matrix.source }}" \
-              -d "${{ matrix.build_dir }}" \
-              -- ${{ matrix.cmake_args }}
-          else
-            west build -p always -b "${{ matrix.board }}" \
-              -s "${{ matrix.source }}" \
-              -d "${{ matrix.build_dir }}"
-          fi
+          case "${{ matrix.target }}" in
+            nucleo-f767zi-mock)
+              west build -p always -b nucleo_f767zi \
+                -s app \
+                -d build/nucleo-f767zi-mock
+              ;;
+            nucleo-f767zi-robotdyn)
+              west build -p always -b nucleo_f767zi \
+                -s app \
+                -d build/nucleo-f767zi-robotdyn \
+                -- -DEXTRA_CONF_FILE=app/ci/robotdyn.conf \
+                   -DEXTRA_DTC_OVERLAY_FILE=app/ci/robotdyn.overlay
+              ;;
+            profile-native-test)
+              west build -p always -b native_sim/native/64 \
+                -s app/tests/profile \
+                -d build/profile-native-test
+              ;;
+          esac
 
-      - name: Run ${{ matrix.name }}
-        if: matrix.run_binary != ''
-        run: ${{ matrix.run_binary }}
+      - name: Run profile-native-test
+        if: matrix.target == 'profile-native-test'
+        run: build/profile-native-test/zephyr/zephyr.exe
