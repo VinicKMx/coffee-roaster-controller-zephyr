@@ -19,40 +19,26 @@ current, fuse, enclosure, heatsink and safety relay wiring are verified against
 
 ## Build
 
-From a Zephyr workspace:
+From an initialized Zephyr workspace:
 
 ```sh
-west build -b nucleo_f767zi
+west build -p always -b nucleo_f767zi -s app
 ```
 
-For a pristine rebuild:
+To compile the RobotDyn dimmer backend:
 
 ```sh
-west build -p always -b nucleo_f767zi
+west build -p always -b nucleo_f767zi -s app \
+  -- -DEXTRA_CONF_FILE=app/ci/robotdyn.conf \
+     -DEXTRA_DTC_OVERLAY_FILE=app/ci/robotdyn.overlay
 ```
-
-With the local workspace found under `../projetos`:
-
-```sh
-cd /home/vinicius/Documents/projetos/zephyr-dev/workspaces/blueglyph
-west build -p always -b nucleo_f767zi \
-  -s /home/vinicius/Documents/projetos-pessoais/coffee-roaster-controller-zephyr \
-  -d /tmp/coffee-roaster-build \
-  -- -DZEPHYR_SDK_INSTALL_DIR=/home/vinicius/Documents/projetos/zephyr-dev/sdk/zephyr-sdk-0.16.8
-```
-
-That workspace is Zephyr 3.7.0. SDK 0.17.2 failed in the Zephyr Picolibc
-integration, while SDK 0.16.8 built successfully.
 
 ## Tests
 
 ```sh
-cd /home/vinicius/Documents/projetos/zephyr-dev/workspaces/blueglyph
-west build -p always -b native_sim/native/64 \
-  -s /home/vinicius/Documents/projetos-pessoais/coffee-roaster-controller-zephyr/tests/profile \
-  -d /tmp/coffee-roaster-test-profile \
-  -- -DZEPHYR_SDK_INSTALL_DIR=/home/vinicius/Documents/projetos/zephyr-dev/sdk/zephyr-sdk-0.16.8
-/tmp/coffee-roaster-test-profile/zephyr/zephyr.exe
+west build -p always -b native_sim/native/64 -s app/tests/profile \
+  -d build/profile-test
+build/profile-test/zephyr/zephyr.exe
 ```
 
 ## Current Hardware Assumptions

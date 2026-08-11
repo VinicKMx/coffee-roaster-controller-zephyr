@@ -7,6 +7,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: nucleo-f767zi-mock
+            board: nucleo_f767zi
+            source: app
+            build_dir: build/nucleo-f767zi-mock
+            cmake_args: ""
+            run_binary: ""
+          - name: nucleo-f767zi-robotdyn
+            board: nucleo_f767zi
+            source: app
+            build_dir: build/nucleo-f767zi-robotdyn
+            cmake_args: >-
+              -DEXTRA_CONF_FILE=app/ci/robotdyn.conf
+              -DEXTRA_DTC_OVERLAY_FILE=app/ci/robotdyn.overlay
+            run_binary: ""
+          - name: profile-native-test
+            board: native_sim/native/64
+            source: app/tests/profile
+            build_dir: build/profile-native-test
+            cmake_args: ""
+            run_binary: build/profile-native-test/zephyr/zephyr.exe
 
     steps:
       - name: Checkout application
@@ -25,5 +49,19 @@ jobs:
           app-path: app
           toolchains: arm-zephyr-eabi
 
-      - name: Build NUCLEO-F767ZI firmware
-        run: west build -b nucleo_f767zi app
+      - name: Build ${{ matrix.name }}
+        run: |
+          if [ -n "${{ matrix.cmake_args }}" ]; then
+            west build -p always -b "${{ matrix.board }}" \
+              -s "${{ matrix.source }}" \
+              -d "${{ matrix.build_dir }}" \
+              -- ${{ matrix.cmake_args }}
+          else
+            west build -p always -b "${{ matrix.board }}" \
+              -s "${{ matrix.source }}" \
+              -d "${{ matrix.build_dir }}"
+          fi
+
+      - name: Run ${{ matrix.name }}
+        if: matrix.run_binary != ''
+        run: ${{ matrix.run_binary }}

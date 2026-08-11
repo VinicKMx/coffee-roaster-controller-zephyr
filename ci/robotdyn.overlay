@@ -1,0 +1,24 @@
+/ {
+	aliases {
+		heater-zc0 = &robotdyn_zc;
+		heater-psm0 = &robotdyn_psm;
+	};
+
+	robotdyn_inputs {
+		compatible = "gpio-keys";
+
+		robotdyn_zc: robotdyn_zc {
+			gpios = <&gpiof 15 GPIO_ACTIVE_HIGH>;
+			label = "RobotDyn ZC";
+		};
+	};
+
+	robotdyn_outputs {
+		compatible = "gpio-leds";
+
+		robotdyn_psm: robotdyn_psm {
+			gpios = <&gpioe 13 GPIO_ACTIVE_HIGH>;
+			label = "RobotDyn PSM";
+		};
+	};
+};
