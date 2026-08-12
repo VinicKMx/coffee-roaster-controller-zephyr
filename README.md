@@ -1,4 +1,4 @@
-# Coffee Roaster Controller Zephyr
+# Coffee Roaster Controller
 
 Safety-oriented embedded coffee roasting controller built on Zephyr for the
 NUCLEO-F767ZI reference platform.
